@@ -10,7 +10,7 @@ class Spore(Entity):
     def tick(self, dt):
         super().tick(dt)
 
-        if self.velocity.magnitude() == 0:
+        if self.velocity.magnitude() < 1.0:
             self.alive = False
             self.entity.position = self.position
             self.entity.food = self.food

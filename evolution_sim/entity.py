@@ -1,9 +1,9 @@
+from abc import ABC
 import pygame
-import math
 from pygame import Vector2
-from config import FRICTION, WIDTH, HEIGHT
+from config import FRICTION, WIDTH, HEIGHT, WALL_FORCE
 
-class Entity:
+class Entity(ABC):
     draw_food = False
     debug_font = None
 
@@ -20,7 +20,7 @@ class Entity:
         self.position = Vector2(x, y)
         self.velocity = Vector2(0, 0)
         self.radius = radius
-        self.area = math.pi * radius * radius
+        self.area = radius * radius
         self.food = food
         self.alive = True
 
@@ -37,29 +37,21 @@ class Entity:
         # accelerate it back into bounds (100 unit/s/s)
         x, y = self.position.x, self.position.y
         if x + self.radius >= WIDTH:
-            self.velocity.x -= dt * 100
+            self.velocity.x -= dt * WALL_FORCE
         elif x - self.radius <= 0:
-            self.velocity.x += dt * 100
+            self.velocity.x += dt * WALL_FORCE
         
         if y + self.radius >= HEIGHT:
-            self.velocity.y -= dt * 100
+            self.velocity.y -= dt * WALL_FORCE
         elif y - self.radius <= 0:
-            self.velocity.y += dt * 100
+            self.velocity.y += dt * WALL_FORCE
 
-        # Slow down due to friction, move
-        if self.velocity.magnitude() > 0:
-            # Multiply by dt to get change in velocity
-            dv = FRICTION * dt
+        # Linear drag force
+        drag = -self.velocity * FRICTION
+        self.velocity += drag * dt
 
-            # Set velocity to 0 if dv >= v
-            # Otherwise v -= dv
-            if dv >= self.velocity.magnitude():
-                self.velocity.update(0)
-            else:
-                self.velocity.scale_to_length(self.velocity.magnitude() - dv)
-
-            # Update position based on velocity
-            self.position += (self.velocity * dt)
+        # Move
+        self.position += self.velocity * dt
 
     def draw(self, screen):
         x, y = int(self.position.x), int(self.position.y)
@@ -78,4 +70,7 @@ class Entity:
             text_rect = text_surface.get_rect()
             text_rect.center = (x, y)
             screen.blit(text_surface, text_rect)
+
+    def interact(self, other, dt):
+        pass
 

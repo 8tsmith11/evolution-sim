@@ -1,8 +1,7 @@
 from entity import Entity
 from spore import Spore
-from config import PLANT_FOOD_RATE
+from config import PLANT_FOOD_RATE, FOOD_KINETIC_ENERGY
 import random
-import math
 import pygame
 
 # Default, constant plant colors
@@ -10,7 +9,7 @@ GREEN = (50, 180, 50)
 DARK_GREEN = (20, 100, 20)
 
 SPORE_RADIUS = 5
-SPORE_AREA = math.pi * SPORE_RADIUS**2
+SPORE_AREA = SPORE_RADIUS**2
 
 class Plant(Entity):
     def __init__(self, *args, **kwargs):
@@ -19,9 +18,9 @@ class Plant(Entity):
         kwargs['border_ratio'] = 0.15
         super().__init__(*args, **kwargs)
 
-        self.spore_threshold = 200
-        self.min_spore_food = 150
-        self.max_spore_food = 199
+        self.spore_threshold = 20
+        self.min_spore_food = 5
+        self.max_spore_food = 10
 
 
     def tick(self, dt):
@@ -39,7 +38,7 @@ class Plant(Entity):
             propulsion_food = random.uniform(self.min_spore_food, self.max_spore_food)
             self.food -= propulsion_food
             propulsion_food -= 1 # The spore has 1 food to keep it alive
-            magnitude = 100 * propulsion_food / SPORE_AREA
+            magnitude = FOOD_KINETIC_ENERGY * propulsion_food / SPORE_AREA
             spore_velocity = pygame.math.Vector2()
             spore_velocity.from_polar((magnitude, angle))
             spore_position = self.position + spore_velocity.normalize() * self.radius
