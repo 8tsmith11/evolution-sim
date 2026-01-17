@@ -12,7 +12,7 @@ class Entity:
         x,
         y,
         radius,
-        food=0,
+        food=1,
         color=(0, 0, 0),
         border_color=(0, 0, 0),
         border_ratio=0, # border_ratio * radius = border thickness
@@ -22,12 +22,17 @@ class Entity:
         self.radius = radius
         self.area = math.pi * radius * radius
         self.food = food
+        self.alive = True
 
         self.color = color
         self.border_color = border_color
         self.border_ratio = border_ratio
 
     def tick(self, dt):
+        if self.food <= 0:
+            self.alive = False
+            return
+
         # If the entity's edge has moved past a screen border,
         # accelerate it back into bounds (100 unit/s/s)
         x, y = self.position.x, self.position.y
@@ -43,9 +48,8 @@ class Entity:
 
         # Slow down due to friction, move
         if self.velocity.magnitude() > 0:
-            # Acceleration = Friction * Area
             # Multiply by dt to get change in velocity
-            dv = FRICTION * self.area * dt
+            dv = FRICTION * dt
 
             # Set velocity to 0 if dv >= v
             # Otherwise v -= dv
@@ -56,12 +60,6 @@ class Entity:
 
             # Update position based on velocity
             self.position += (self.velocity * dt)
-
-        
-
-
-
-
 
     def draw(self, screen):
         x, y = int(self.position.x), int(self.position.y)
