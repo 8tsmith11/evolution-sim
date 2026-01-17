@@ -1,6 +1,7 @@
 import pygame
-import pygame.font
+import math
 from pygame import Vector2
+from config import FRICTION, WIDTH, HEIGHT
 
 class Entity:
     draw_food = False
@@ -19,6 +20,7 @@ class Entity:
         self.position = Vector2(x, y)
         self.velocity = Vector2(0, 0)
         self.radius = radius
+        self.area = math.pi * radius * radius
         self.food = food
 
         self.color = color
@@ -26,7 +28,40 @@ class Entity:
         self.border_ratio = border_ratio
 
     def tick(self, dt):
-        pass
+        # If the entity's edge has moved past a screen border,
+        # accelerate it back into bounds (100 unit/s/s)
+        x, y = self.position.x, self.position.y
+        if x + self.radius >= WIDTH:
+            self.velocity.x -= dt * 100
+        elif x - self.radius <= 0:
+            self.velocity.x += dt * 100
+        
+        if y + self.radius >= HEIGHT:
+            self.velocity.y -= dt * 100
+        elif y - self.radius <= 0:
+            self.velocity.y += dt * 100
+
+        # Slow down due to friction, move
+        if self.velocity.magnitude() > 0:
+            # Acceleration = Friction * Area
+            # Multiply by dt to get change in velocity
+            dv = FRICTION * self.area * dt
+
+            # Set velocity to 0 if dv >= v
+            # Otherwise v -= dv
+            if dv >= self.velocity.magnitude():
+                self.velocity.update(0)
+            else:
+                self.velocity.scale_to_length(self.velocity.magnitude() - dv)
+
+            # Update position based on velocity
+            self.position += (self.velocity * dt)
+
+        
+
+
+
+
 
     def draw(self, screen):
         x, y = int(self.position.x), int(self.position.y)
