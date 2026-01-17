@@ -1,9 +1,20 @@
 import pygame
 from entity import Entity
+from plant import Plant
+from random import randint
 
 class World:
-    def __init__(self):
-        self.entities = [Entity(100, 100, 30, 30, (23, 32, 185), 0, 0.5)]
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+
+        # Initialize entities
+        # Plants
+
+        plants = [Plant(randint(0, width), randint(0, height), 15) for _ in range(20)]
+
+        self.entities = plants
 
     def tick(self, dt):
         for e in self.entities:
